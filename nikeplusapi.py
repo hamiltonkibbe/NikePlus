@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-
+"""
+@file   nikeplusapi.py
+@author Hamilton Kibbe
+"""
 from nikeurls import NikeURLs
 from nikerun import NikeRun, NikeRunStats
 
@@ -8,7 +11,7 @@ from xml.etree import ElementTree as xmlTree
 
 
 
-class NikePlusAPI:
+class NikePlusAPI(object):
     def __init__(self,username,password):
         self.URLs = NikeURLs()
         self.username = username
@@ -36,12 +39,17 @@ class NikePlusAPI:
         self.RunList = [NikeRunStats(run) for run in runList.find('runList').findall('run')]
 	return self.RunList        
     
-    def getRun(self,id):
-	xmlRun = xmlTree.fromstring(urllib2.urlopen(self.URLs.runURL(id)).read())
+    def getRun(self,runId):
+	xmlRun = xmlTree.fromstring(urllib2.urlopen(self.URLs.runURL(runId)).read())
 	return NikeRun(xmlRun)	    
 
+    def getGps(self,runId):
+        pass
+        
+
+API = NikePlusAPI("hamilton.kibbe@gmail.com","silvermine")
+runs = API.getRunList()
+run = API.getRun(str(runs[0].RunId))
+print run._speedList
 
 
-SYNC = NikePlusAPI("hamilton.kibbe@gmail.com","silvermine")
-runs = SYNC.getRunList()
-SYNC.getRun(str(runs[0].RunId))

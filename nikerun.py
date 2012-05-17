@@ -1,22 +1,13 @@
 # -*- coding: utf-8 -*-
+"""
+@file   nikerun.py
+@author Hamilton Kibbe
+"""
+
+from nikeuser import NikeUser
+from nikesnapshot import NikeSnapshot, NikeSnapshotList
 
 from xml.etree import ElementTree as xmlTree
-
-
-class NikeUser(object):
-    def __init__(self,xmlUser)
-        self._weight = xmlUser.find('weight').text
-        self._equipmentType = xmlUser.find('equipmentType').text
-        
-    @property 
-    def weightKg(self):
-        return '%0.1f' % self._weight
-        
-    @property
-    def weightLbs(self):
-        return '%0.1f' % (self._weight * 2.20462262)
-        
-    
 
 
 
@@ -37,7 +28,7 @@ class NikeRunStats(object):
         self._seconds = self._duration % 3600000 % 60000 / 1000
         self._date = 0
         self._time = 0
-        self._calories = float(xmlRun.find('calories').text) 
+        self._calories = float(xmlRun.find('calories').text)
         
     @property   
     def RunId(self):
@@ -56,7 +47,13 @@ class NikeRunStats(object):
         
         return ('%.2f' % self._distance)
     
-    
+    @property 
+    def weightKg(self):
+        return '%0.1f' % self._weight
+        
+    @property
+    def weightLbs(self):
+        return '%0.1f' % (self._weight * 2.20462262)
     @property
     def DistanceMiles(self):
         """ 
@@ -85,29 +82,6 @@ class NikeRunStats(object):
 
 
 
-
-class NikeSnapshotList(object):
-    def __init__(self,xmlSnapshotList):
-        self._type = xmlSnapshotList.get('snapShotType')
-        self._KmSnapshots = [NikeSnapshot(snapshot) for snapshot in xmlSnapshotList.findall('snapShot')]
-        
-        
-    @property
-    def type(self):
-        return self._type
-
-
-
-class NikeSnapshot(object):
-    def __init__(self,xmlSnapshot):
-        self._id = xmlSnapshot.get('id')
-        self.event = xmlSnapshot.get('event')
-        self.pace = xmlSnapshot.find('pace').text
-        self.distance = xmlSnapshot.find('distance').text
-        self.duration = xmlSnapshot.find('duration').text
-
-      
-
 class NikeRun(object):
 
     def __init__(self, xmlRun):
@@ -120,6 +94,7 @@ class NikeRun(object):
         userInfo = sportsData.find('userInfo')
         runSummary = sportsData.find('runSummary')
         extendedDataList = sportsData.find('extendedDataList')
+        
         self._user = NikeUser(userInfo)
         
         # Run Summary
@@ -134,8 +109,16 @@ class NikeRun(object):
         # Distnace / Split / Pace data
         self._snapshotLists = [NikeSnapshotList(sslist) for sslist in sportsData.findall('snapShotList')]
         self._extendedDistanceInterval = int(extendedDataList.find('extendedData').get('intervalValue'))
+        
         self._extendedDistanceList = [float(data) for data in extendedDataList.find('extendedData').text.split(',')]
-        self._speedList = [(3600/self.extendedDistanceInterval) * dist for dist in  self.extendedDistanceList]
+        
+        speedList = list()
+        previous_dist = 0
+        for dist in self._extendedDistanceList:
+            speedList.append(float('%0.2f' % ((3600/self._extendedDistanceInterval) * (dist - previous_dist))))
+            previous_dist = dist
+            
+        self._speedList = speedList
         
         # Run Metadata
         self._hasHRS = runSummary.get('hasHRS')
@@ -147,21 +130,25 @@ class NikeRun(object):
 
     def KmSplitSnapshots(self):
         for sslist in self._snapshotLists:
-            if sslist._type = 'kmSplit':
+            if sslist._type == 'kmSplit':
                 theSnapshotList = sslist
         return [snapshot for snapshot in theSnapshotList]
     
     def MileSplitSnapshots(self):
         for sslist in self._snapshotLists:
-            if sslist._type = 'mileSplit':
+            if sslist._type == 'mileSplit':
                 theSnapshotList = sslist
         return [snapshot for snapshot in theSnapshotList]
         
     def UserClickSnapshots(self):
         for sslist in self._snapshotLists:
-            if sslist._type = 'userClick':
+            if sslist._type == 'userClick':
                 theSnapshotList = sslist
         return [snapshot for snapshot in theSnapshotList]    
+    @property
+    def user(self):
+        return self._user
+        
         
     @property
     def startTime(self):
