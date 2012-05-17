@@ -98,23 +98,53 @@ class NikeRun:
         extendedDataList = sportsData.find('extendedDataList')
         
         # Run Summary
-        self.startTime = sportsData.find('startTime').text
-        self.distance = float(runSummary.find('distance').text)
-        self.duration = int(runSummary.find('duration').text)
-        self.calories = float(runSummary.find('calories').text)
-        self.snapshotLists = [NikeSnapshotList(sslist) for sslist in sportsData.findall('snapShotList')]
+        self._startTime = sportsData.find('startTime').text
+        self._distance = float(runSummary.find('distance').text)
+        self._duration = int(runSummary.find('duration').text)
+        self._hours = self._duration / 3600000
+        self._minutes = self._duration % 360000 / 60000
+        self._seconds = self._duration % 3600000 % 60000 / 1000
+        self._calories = float(runSummary.find('calories').text)
+        self._snapshotLists = [NikeSnapshotList(sslist) for sslist in sportsData.findall('snapShotList')]
         
-        # Run Distance
-        self.extendedDistanceInterval = int(extendedDataList.find('extendedData').get('intervalValue'))
-        self.extendedDistanceList = [float(data) for data in extendedDataList.find('extendedData').text.split(',')]
-        self.speedList = [(3600/self.extendedDistanceInterval) * dist for dist in  self.extendedDistanceList]
+        # Distance/pace data
+        self._extendedDistanceInterval = int(extendedDataList.find('extendedData').get('intervalValue'))
+        self._extendedDistanceList = [float(data) for data in extendedDataList.find('extendedData').text.split(',')]
+        self._speedList = [(3600/self.extendedDistanceInterval) * dist for dist in  self.extendedDistanceList]
         
         # Run Metadata
-        self.hasHRS = runSummary.get('hasHRS')
-        self.workoutType = runSummary.get('workoutType')
-        self.equipmentType = runSummary.find('equipmentType').text
-        self.howFelt = int(sportsData.find('howFelt').text)
-        self.weather = int(sportsData.find('weather').text)
-        self.terrain = int(sportsData.find('terrain').text)
+        self._hasHRS = runSummary.get('hasHRS')
+        self._workoutType = runSummary.get('workoutType')
+        self._equipmentType = runSummary.find('equipmentType').text
+        self._howFelt = int(sportsData.find('howFelt').text)
+        self._weather = int(sportsData.find('weather').text)
+        self._terrain = int(sportsData.find('terrain').text)
         print self.speedList[0]
+        
+    @property
+    def startTime(self):
+        """
+        Need to convert this wacky string to something more meaningful
+        """
+        return self._startTime
+    
+    @property
+    def distanceKilometers(self):
+        return '%0.2f' % self._distance
+    
+    @property
+    def distanceMiles(self):
+        return '%0.2f' % (self._distance * 0.621371192)
+        
+    @property
+    def duration(self):
+        return  ('%02d' % self._hours) + ':' + ('%02d' % self._minutes) + ':' + ('%02d' % self._seconds)
+        
+    @property
+    def calories(self):
+        return '%0.1f' % self._calories
+    
+    @property
+    def howFelt(self):
+        feelings = ('Awesome','So-so','Sluggish','Injured')
     

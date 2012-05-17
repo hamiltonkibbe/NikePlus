@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import urllib2
 
 class NikeURLs:
@@ -12,7 +14,7 @@ class NikeURLs:
 		return self._AUTH_URL+'login='+urllib2.quote(username)+'&password='+urllib2.quote(password)
 
 	def runURL(self,runId):
-                return self._RUNDATA_URL+'id='+str(runId)
+        return self._RUNDATA_URL+'id='+str(runId)
 
 	def gpsURL(self,runId):
 		return self._GPS_URL+'id='+str(runId)
