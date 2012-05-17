@@ -70,8 +70,13 @@ class NikeRunStats:
 
 class NikeSnapshotList:
     def __init__(self,xmlSnapshotList):
-        self.type = xmlSnapshotList.get('snapShotType')
-        self.snapshots = [NikeSnapshot(snapshot) for snapshot in xmlSnapshotList.findall('snapShot')]
+        self._type = xmlSnapshotList.get('snapShotType')
+        self._KmSnapshots = [NikeSnapshot(snapshot) for snapshot in xmlSnapshotList.findall('snapShot')]
+        
+        
+    @property
+    def type(self):
+        return self._type
 
 
 
@@ -105,9 +110,9 @@ class NikeRun:
         self._minutes = self._duration % 360000 / 60000
         self._seconds = self._duration % 3600000 % 60000 / 1000
         self._calories = float(runSummary.find('calories').text)
-        self._snapshotLists = [NikeSnapshotList(sslist) for sslist in sportsData.findall('snapShotList')]
         
-        # Distance/pace data
+        # Distnace / Split / Pace data
+        self._snapshotLists = [NikeSnapshotList(sslist) for sslist in sportsData.findall('snapShotList')]
         self._extendedDistanceInterval = int(extendedDataList.find('extendedData').get('intervalValue'))
         self._extendedDistanceList = [float(data) for data in extendedDataList.find('extendedData').text.split(',')]
         self._speedList = [(3600/self.extendedDistanceInterval) * dist for dist in  self.extendedDistanceList]
@@ -119,7 +124,24 @@ class NikeRun:
         self._howFelt = int(sportsData.find('howFelt').text)
         self._weather = int(sportsData.find('weather').text)
         self._terrain = int(sportsData.find('terrain').text)
-        print self.speedList[0]
+
+    def KmSplitSnapshots(self):
+        for sslist in self._snapshotLists:
+            if sslist._type = 'kmSplit':
+                theSnapshotList = sslist
+        return [snapshot for snapshot in theSnapshotList]
+    
+    def MileSplitSnapshots(self):
+        for sslist in self._snapshotLists:
+            if sslist._type = 'mileSplit':
+                theSnapshotList = sslist
+        return [snapshot for snapshot in theSnapshotList]
+        
+    def UserClickSnapshots(self):
+        for sslist in self._snapshotLists:
+            if sslist._type = 'userClick':
+                theSnapshotList = sslist
+        return [snapshot for snapshot in theSnapshotList]    
         
     @property
     def startTime(self):
@@ -146,5 +168,17 @@ class NikeRun:
     
     @property
     def howFelt(self):
-        feelings = ('Awesome','So-so','Sluggish','Injured')
+        howFelt = ['Awesome', 'So-so', 'Sluggish', 'Injured']
+        return howFelt[(self._howFelt - 1)]
+        
+    @property
+    def weather(self):
+        weather = ['Sunny', 'Cloudy', 'Rainy', 'Snowy']
+        return weather[(self._weather - 1)]
+        
+    @property
+    def terrain(self):
+        terrain = ['Road', 'Trail', 'Treadmill', 'Track']
+        return terrain[(self._terrain -1)]
+        
     
