@@ -2,7 +2,25 @@
 
 from xml.etree import ElementTree as xmlTree
 
-class NikeRunStats:
+
+class NikeUser(object):
+    def __init__(self,xmlUser)
+        self._weight = xmlUser.find('weight').text
+        self._equipmentType = xmlUser.find('equipmentType').text
+        
+    @property 
+    def weightKg(self):
+        return '%0.1f' % self._weight
+        
+    @property
+    def weightLbs(self):
+        return '%0.1f' % (self._weight * 2.20462262)
+        
+    
+
+
+
+class NikeRunStats(object):
     """
     Class for storing information about a run
     """
@@ -68,7 +86,7 @@ class NikeRunStats:
 
 
 
-class NikeSnapshotList:
+class NikeSnapshotList(object):
     def __init__(self,xmlSnapshotList):
         self._type = xmlSnapshotList.get('snapShotType')
         self._KmSnapshots = [NikeSnapshot(snapshot) for snapshot in xmlSnapshotList.findall('snapShot')]
@@ -80,7 +98,7 @@ class NikeSnapshotList:
 
 
 
-class NikeSnapshot:
+class NikeSnapshot(object):
     def __init__(self,xmlSnapshot):
         self._id = xmlSnapshot.get('id')
         self.event = xmlSnapshot.get('event')
@@ -90,7 +108,7 @@ class NikeSnapshot:
 
       
 
-class NikeRun:
+class NikeRun(object):
 
     def __init__(self, xmlRun):
         
@@ -99,8 +117,10 @@ class NikeRun:
             return 0
             
         sportsData = xmlRun.find('sportsData')
+        userInfo = sportsData.find('userInfo')
         runSummary = sportsData.find('runSummary')
         extendedDataList = sportsData.find('extendedDataList')
+        self._user = NikeUser(userInfo)
         
         # Run Summary
         self._startTime = sportsData.find('startTime').text
