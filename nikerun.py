@@ -4,6 +4,8 @@
 @author Hamilton Kibbe
 """
 
+# USE THIS ONE  
+
 from nikeuser import NikeUser
 from nikesnapshot import NikeSnapshot, NikeSnapshotList
 

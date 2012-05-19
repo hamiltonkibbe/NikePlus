@@ -20,5 +20,5 @@ class NikeURLs(object):
         return self._RUNDATA_URL+'id='+str(runId)
     
     def gpsURL(self,runId):
-        return self._GPS_URL+'id='+str(runId)
+        return self._GPS_URL+'id='+str(runId)+'&format=json'
 

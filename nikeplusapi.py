@@ -5,8 +5,10 @@
 """
 from nikeurls import NikeURLs
 from nikerun import NikeRun, NikeRunStats
+from nikegps import NikeGPS
 
 import urllib2, cookielib
+import json
 from xml.etree import ElementTree as xmlTree
 
 
@@ -27,29 +29,29 @@ class NikePlusAPI(object):
         
         xmlResponse = urllib2.urlopen(self.URLs.authURL(self.username,self.password))
         xml = xmlTree.fromstring(xmlResponse.read())
-        
-        if xml.find("status").text != "success":
-            print "Failed to authenticate."
-            return
-        
-        self._PIN = xml.find("pin").text
+
+        if xml is None:
+            print'Failed to connect'
+            return None
+
+        if xml.find('status') is None or xml.find('status').text != 'success':
+            print'Authentication failed.'
+            return None
+   
+        self._PIN = xml.find('pin').text
+
 
     def getRunList(self):
         runList = xmlTree.fromstring(urllib2.urlopen(self.URLs._RUNLIST_URL).read())
         self.RunList = [NikeRunStats(run) for run in runList.find('runList').findall('run')]
-	return self.RunList        
+        return self.RunList 
     
     def getRun(self,runId):
-	xmlRun = xmlTree.fromstring(urllib2.urlopen(self.URLs.runURL(runId)).read())
-	return NikeRun(xmlRun)	    
+        xmlRun = xmlTree.fromstring(urllib2.urlopen(self.URLs.runURL(runId)).read())
+        return NikeRun(xmlRun)	    
 
     def getGps(self,runId):
-        pass
-        
-
-API = NikePlusAPI("hamilton.kibbe@gmail.com","silvermine")
-runs = API.getRunList()
-run = API.getRun(str(runs[0].RunId))
-print run._speedList
+        jsonGPS = json.loads(urllib2.urlopen(self.URLs.gpsURL(runId)).read())
+        return NikeGPS(jsonGPS)
 
 
